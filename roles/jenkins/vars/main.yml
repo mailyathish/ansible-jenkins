@@ -1,0 +1,8 @@
+---
+# vars file for jenkins
+
+java:
+  VERSION: "openjdk-11-jdk"
+
+
+

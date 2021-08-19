@@ -1,0 +1,49 @@
+---
+
+- name: Install Java 8 .
+  apt:
+    name: "{{java.VERSION}}"
+    state: present
+    install_recommends: no
+  become: true
+  
+- name: get Java version
+  shell: java --version 2>&1
+  register: java_output
+    
+- debug: 
+    var=java_output.stdout_lines
+
+
+- name: Install Python
+  raw: apt -y update && apt install -y python3
+  become: true
+
+- name: get Python version
+  shell: python3 --version 2>&1
+  register: python_output
+    
+- debug: 
+    var=python_output.stdout_lines
+
+- name: ensure the jenkins apt repository key is installed
+  apt_key: url=https://pkg.jenkins.io/debian-stable/jenkins.io.key state=present
+  become: yes
+
+- name: ensure the repository is configured
+  apt_repository: repo='deb https://pkg.jenkins.io/debian-stable binary/' state=present
+  become: yes
+
+- name: ensure jenkins is installed
+  apt: name=jenkins update_cache=yes
+  become: yes
+
+- name: ensure jenkins is running
+  service: name=jenkins state=started
+
+- name: Retrieve Jenkins unlock code
+  shell: "cat /var/lib/jenkins/secrets/initialAdminPassword"
+  register: jenkins_unlock
+  become: yes
+- debug: msg="Jenkins unlock code (install admin password) is {{ jenkins_unlock.stdout }}"
+
